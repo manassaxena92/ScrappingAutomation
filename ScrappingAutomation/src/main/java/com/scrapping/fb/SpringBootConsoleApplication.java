@@ -34,7 +34,7 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
     	
     	String emailId = "";
     	String password = "";
-    	String fileDirectory = "";
+    	String fileDirectory = "" ;
 
     	String exePath = "/usr/local/Caskroom/chromedriver/76.0.3809.126/chromedriver";
         System.setProperty("webdriver.chrome.driver", exePath);

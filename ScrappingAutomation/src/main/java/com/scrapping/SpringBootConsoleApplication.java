@@ -39,7 +39,7 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		System.out.println("Application started");
+		System.out.println("Application started ");
 	}
 
 	@Scheduled(cron = "${com.scrapping.cron.expression}", zone = "GMT+5:30")

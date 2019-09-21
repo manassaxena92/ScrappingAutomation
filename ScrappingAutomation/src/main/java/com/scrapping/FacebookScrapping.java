@@ -18,26 +18,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FacebookScrapping {
-	
-	private static WebDriver driver = new ChromeDriver();
-	
-	public void login(String emailId, String password) throws InterruptedException {
-		driver.get("https://www.facebook.com");
-		System.out.println("Successfully opened the website");
-		driver.manage().window().maximize();
-		driver.findElement(By.id("email")).sendKeys(emailId);
-		driver.findElement(By.id("pass")).sendKeys(password);
-		driver.findElement(By.xpath("//input[@value=\"Log In\"]")).click();
-		System.out.println("Successfully logged in");
-		Thread.sleep(3000);
-	}
-	
-	public void downloadImagesfromPages(List<String> fbPageNames, String downloadPath) {
-		String fbdomain = "https://www.facebook.com/";
-		String fbPostsResource = "/posts/";
+
+	private static final String FACEBOOK_DOMAIN = "https://www.facebook.com";
+	private static final String FB_POSTS_RESOURCE = "/posts/";
+
+	public void downloadImagesfromPages(String emailId, String password, List<String> fbPageNames, String downloadPath)
+			throws InterruptedException {
+		WebDriver driver = new ChromeDriver();
+		login(emailId, password, driver);
 		fbPageNames.stream().forEach(pageName -> {
 			System.out.println("Downloading images of page:" + pageName);
-			String fullPagePostsUrl = fbdomain + pageName + fbPostsResource;
+			String fullPagePostsUrl = FACEBOOK_DOMAIN + pageName + FB_POSTS_RESOURCE;
 			driver.get(fullPagePostsUrl);
 			try {
 				Thread.sleep(4000);
@@ -69,8 +60,20 @@ public class FacebookScrapping {
 					});
 
 		});
+		driver.close();
 	}
-	
+
+	private void login(String emailId, String password, WebDriver driver) throws InterruptedException {
+		driver.get(FACEBOOK_DOMAIN);
+		System.out.println("Successfully opened the website");
+		driver.manage().window().maximize();
+		driver.findElement(By.id("email")).sendKeys(emailId);
+		driver.findElement(By.id("pass")).sendKeys(password);
+		driver.findElement(By.xpath("//input[@value=\"Log In\"]")).click();
+		System.out.println("Successfully logged in");
+		Thread.sleep(3000);
+	}
+
 	private Set<String> getPendingToPostImageNames(String downloadPath) {
 		Set<String> results = new HashSet<>();
 		File[] files = new File(downloadPath).listFiles();

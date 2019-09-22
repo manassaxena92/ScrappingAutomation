@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Delayed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +49,9 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 
 	@Value("${com.scrapping.instagramPost.endIntervalInMin}")
 	private int instagramPostEndIntervalMin;
+
+	@Value("${com.scrapping.stopPostingForNext.intervalInHours}")
+	private int stopPostingForNextHours;
 
 	@Autowired
 	private FacebookScrapping facebookScrapping;
@@ -101,9 +107,19 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 				System.out.println("Failed posting to instagram");
 			}
 
-			int result = new Random().nextInt(instagramPostEndIntervalMin - instagramPostStartIntervalMin)
-					+ instagramPostStartIntervalMin;
-			int delay = result * 60 * 1000;
+			Calendar cal = Calendar.getInstance(); // Create Calendar-Object
+			cal.setTime(new Date()); // Set the Calendar to now
+			int hour = cal.get(Calendar.HOUR_OF_DAY);
+
+			int delay;
+			if (hour > 22) {
+				delay = stopPostingForNextHours * 60 * 60 * 1000;
+			} else {
+				int result = new Random().nextInt(instagramPostEndIntervalMin - instagramPostStartIntervalMin)
+						+ instagramPostStartIntervalMin;
+				delay = result * 60 * 1000;
+			}
+
 			timer.schedule(new InstagramActivity(), delay);
 		}
 	}

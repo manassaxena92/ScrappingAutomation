@@ -9,9 +9,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
@@ -81,7 +83,8 @@ public class InstagramPoster {
 			// add hash tags to text area
 			String textAreaValue = getRandomHashTags();
 
-			driver.findElement(By.xpath("/html/body/span/section/div[2]/section[1]/div[1]/textarea")).sendKeys(textAreaValue);
+			driver.findElement(By.xpath("/html/body/span/section/div[2]/section[1]/div[1]/textarea"))
+					.sendKeys(textAreaValue);
 			// click share button
 			driver.findElement(By.xpath("/html/body/span/section/div[1]/header/div/div[2]/button")).click();
 		} catch (Exception e) {
@@ -105,9 +108,14 @@ public class InstagramPoster {
 		List<String> hashTagsList = Arrays.asList(hashTags.split(","));
 
 		String textAreaValue = "";
+		Set<Integer> processedIndex = new HashSet<>();
 		for (int i = 0; i < numberOfHashTags; i++) {
-			int randomIndex = new Random().nextInt(hashTagsList.size());
-			textAreaValue = textAreaValue + "#" + hashTagsList.get(randomIndex) + " ";
+			Integer randomIndex = new Random().nextInt(hashTagsList.size());
+			if (!processedIndex.contains(randomIndex)) {
+				textAreaValue = textAreaValue + "#" + hashTagsList.get(randomIndex) + " ";
+			} else {
+				processedIndex.add(randomIndex);
+			}
 		}
 		return textAreaValue;
 	}

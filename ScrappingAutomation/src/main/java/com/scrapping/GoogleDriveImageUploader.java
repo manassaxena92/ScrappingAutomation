@@ -102,7 +102,7 @@ public class GoogleDriveImageUploader {
 				for (File fileSearch : result.getFiles()) {
 					String coreFileName =  fileSearch.getName().replace(COMPLETED_UPLOAD_PREFIX, "");
 					coreFileName =  fileSearch.getName().replace(TO_BE_UPLOADED_PREFIX, "");
-					if (fileSearch.getName().equals(coreFileName)) {
+					if (fileName.equals(coreFileName)) {
 						return true;
 					}
 				}

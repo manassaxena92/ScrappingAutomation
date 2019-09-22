@@ -2,13 +2,13 @@ package com.scrapping;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -23,7 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class SpringBootConsoleApplication implements CommandLineRunner {
 
-	@Value("${com.scrapping.fb.pagename}")
+	@Value("${com.scrapping.fb.commaSeparated.pagenames}")
 	private String fbPageName;
 
 	@Value("${com.scrapping.fb.username}")
@@ -53,6 +53,9 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 	@Autowired
 	private InstagramPoster instagramPoster;
 
+	@Autowired
+	private GoogleDriveImageUploader googleDriveManager;
+
 	public static void main(String[] args) throws Exception {
 		SpringApplication app = new SpringApplication(SpringBootConsoleApplication.class);
 		app.run(args);
@@ -66,12 +69,21 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 
 	@Scheduled(cron = "${com.scrapping.cron.expression}", zone = "GMT+5:30")
 	public void fbActivity() throws InterruptedException {
-		List<String> fbPageNames = Arrays.asList(fbPageName.split(","));
-		facebookScrapping.downloadImagesfromPages(fbUserName, fbPassword, fbPageNames, fileDirectory);
+		try {
+			List<String> fbPageNames = Arrays.asList(fbPageName.split(","));
+			facebookScrapping.uploadImagesToDrive(fbUserName, fbPassword, fbPageNames, fileDirectory);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
 	}
 
-	public void instaActivity(String imageFilePath) throws InterruptedException, IOException {
-		instagramPoster.post(instaUserName, instaPassword, imageFilePath);
+	public void instaActivity(String imageFilePath) throws InterruptedException, IOException, GeneralSecurityException {
+		try {
+			instagramPoster.post(instaUserName, instaPassword, imageFilePath);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 
 	Timer timer = new Timer();
@@ -80,22 +92,17 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 		@Override
 		public void run() {
 			System.out.println("Task running at: " + System.currentTimeMillis());
-			String imageFilePath = "";
-			File dir = new File(fileDirectory);
-			List<String> children = Arrays.asList(dir.list());
-			if (CollectionUtils.isEmpty(children)) {
-				System.out.println("No images in file directory : " + fileDirectory);
-			} else {
-				imageFilePath = fileDirectory + "/" + children.get(0);
-			}
 			try {
-				instaActivity(imageFilePath);
-			} catch (InterruptedException | IOException e) {
-				throw new RuntimeException("Failed posting to instagram", e);
+				File file = googleDriveManager.downloadFirstFile(fileDirectory);
+				if (file != null && file.exists()) {
+					instaActivity(file.getAbsolutePath());
+				}
+			} catch (Exception e) {
+				System.out.println("Failed posting to instagram");
 			}
+
 			int result = new Random().nextInt(instagramPostEndIntervalMin - instagramPostStartIntervalMin)
 					+ instagramPostStartIntervalMin;
-			System.out.println("random chosen: " + result);
 			int delay = result * 60 * 1000;
 			timer.schedule(new InstagramActivity(), delay);
 		}

@@ -3,9 +3,7 @@ package com.scrapping;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -14,15 +12,19 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FacebookScrapping {
 
-	private static final String FACEBOOK_DOMAIN = "https://www.facebook.com";
+	private static final String FACEBOOK_DOMAIN = "https://www.facebook.com/";
 	private static final String FB_POSTS_RESOURCE = "/posts/";
 
-	public void downloadImagesfromPages(String emailId, String password, List<String> fbPageNames, String downloadPath)
+	@Autowired
+	private GoogleDriveImageUploader googleDriveManager;
+
+	public void uploadImagesToDrive(String emailId, String password, List<String> fbPageNames, String downloadPath)
 			throws InterruptedException {
 		WebDriver driver = new ChromeDriver();
 		login(emailId, password, driver);
@@ -42,10 +44,10 @@ public class FacebookScrapping {
 						String picUrl = picElement.getAttribute("data-ploi");
 						System.out.println("picUrl:" + picUrl);
 						String picName = picUrl.substring(picUrl.lastIndexOf("/") + 1, picUrl.indexOf(".jpg") + 4);
-						Set<String> existingImageNames = getPendingToPostImageNames(downloadPath);
+						
 
-						if (existingImageNames.contains(picName)) {
-							System.out.println("Pic " + picUrl + "already present in image folder, skipping");
+						if (googleDriveManager.fileExist(picName)) {
+							System.out.println("Pic " + picUrl + " already present in image folder, skipping");
 							return;
 						}
 
@@ -54,6 +56,8 @@ public class FacebookScrapping {
 							BufferedImage img = ImageIO.read(url);
 							File file = new File(downloadPath + picName);
 							ImageIO.write(img, "jpg", file);
+							googleDriveManager.uploadImage(downloadPath + picName, picName);
+							file.delete();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -72,17 +76,6 @@ public class FacebookScrapping {
 		driver.findElement(By.xpath("//input[@value=\"Log In\"]")).click();
 		System.out.println("Successfully logged in");
 		Thread.sleep(3000);
-	}
-
-	private Set<String> getPendingToPostImageNames(String downloadPath) {
-		Set<String> results = new HashSet<>();
-		File[] files = new File(downloadPath).listFiles();
-		for (File file : files) {
-			if (file.isFile()) {
-				results.add(file.getName());
-			}
-		}
-		return results;
 	}
 
 }

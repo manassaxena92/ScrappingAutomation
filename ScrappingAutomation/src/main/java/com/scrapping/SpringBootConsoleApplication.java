@@ -111,14 +111,14 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 			int hour = cal.get(Calendar.HOUR_OF_DAY);
 
 			int delay;
-			if (hour > 22) {
+			if (hour > 22 || (hour >= 0 && hour < 7)) {
 				delay = stopPostingForNextHours * 60 * 60 * 1000;
 			} else {
 				int result = new Random().nextInt(instagramPostEndIntervalMin - instagramPostStartIntervalMin)
 						+ instagramPostStartIntervalMin;
 				delay = result * 60 * 1000;
 			}
-
+			System.out.println("Next run will be after delay of: " + delay + " milliseconds");
 			timer.schedule(new InstagramActivity(), delay);
 		}
 	}

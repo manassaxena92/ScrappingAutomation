@@ -87,6 +87,7 @@ public class InstagramPoster {
 					.sendKeys(textAreaValue);
 			// click share button
 			driver.findElement(By.xpath("/html/body/span/section/div[1]/header/div/div[2]/button")).click();
+			Thread.sleep(3000);
 		} catch (Exception e) {
 			System.out.println("Failed to post to instagram");
 		}
@@ -107,7 +108,7 @@ public class InstagramPoster {
 		String hashTags = writer.toString();
 		List<String> hashTagsList = Arrays.asList(hashTags.split(","));
 
-		String textAreaValue = "";
+		String textAreaValue = "#houseofmaymay #houseofmemes ";
 		Set<Integer> processedIndex = new HashSet<>();
 		for (int i = 0; i < numberOfHashTags; i++) {
 			Integer randomIndex = new Random().nextInt(hashTagsList.size());

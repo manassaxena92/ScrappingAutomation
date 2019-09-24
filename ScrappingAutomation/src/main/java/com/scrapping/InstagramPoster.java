@@ -107,14 +107,12 @@ public class InstagramPoster {
 		IOUtils.copy(in, writer, StandardCharsets.UTF_8);
 		String hashTags = writer.toString();
 		List<String> hashTagsList = Arrays.asList(hashTags.split(","));
-
 		String textAreaValue = "#houseofmaymay #houseofmemes ";
 		Set<Integer> processedIndex = new HashSet<>();
 		for (int i = 0; i < numberOfHashTags; i++) {
 			Integer randomIndex = new Random().nextInt(hashTagsList.size());
 			if (!processedIndex.contains(randomIndex)) {
 				textAreaValue = textAreaValue + "#" + hashTagsList.get(randomIndex) + " ";
-			} else {
 				processedIndex.add(randomIndex);
 			}
 		}

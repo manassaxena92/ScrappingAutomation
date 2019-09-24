@@ -43,7 +43,11 @@ public class FacebookScrapping {
 
 						String picUrl = picElement.getAttribute("data-ploi");
 						System.out.println("picUrl:" + picUrl);
-						String picName = picUrl.substring(picUrl.lastIndexOf("/") + 1, picUrl.indexOf(".jpg") + 4);
+						String imageType = "jpg";
+						if(picUrl.indexOf("." + imageType)==-1) {
+							imageType = "png";
+						}
+						String picName = picUrl.substring(picUrl.lastIndexOf("/") + 1, picUrl.indexOf("." + imageType) + 4);
 						
 
 						if (googleDriveManager.fileExist(picName)) {
@@ -55,7 +59,7 @@ public class FacebookScrapping {
 							URL url = new URL(picUrl);
 							BufferedImage img = ImageIO.read(url);
 							File file = new File(downloadPath + picName);
-							ImageIO.write(img, "jpg", file);
+							ImageIO.write(img, imageType, file);
 							googleDriveManager.uploadImage(downloadPath + picName, picName);
 							file.delete();
 						} catch (Exception e) {

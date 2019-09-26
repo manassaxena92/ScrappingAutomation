@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -87,9 +88,10 @@ public class InstagramPoster {
 					.sendKeys(textAreaValue);
 			// click share button
 			driver.findElement(By.xpath("/html/body/span/section/div[1]/header/div/div[2]/button")).click();
-			Thread.sleep(3000);
+			Thread.sleep(2000);
 		} catch (Exception e) {
-			System.out.println("Failed to post to instagram");
+			System.out.println(
+			        "Failed to post to instagra:"+ ExceptionUtils.getStackTrace(e));
 		}
 		driver.close();
 		googleDriveManager.rename(new File(filePath).getName());
